@@ -11,6 +11,9 @@ interface RefundDao {
     @Insert
     suspend fun insert(refund: RefundEntity): Long
 
+    @Query("SELECT MAX(id) FROM refunds")
+    suspend fun getMaxId(): Long?
+
     @Query("SELECT * FROM refunds WHERE saleId = :saleId ORDER BY timestamp DESC")
     fun observeForSale(saleId: Long): Flow<List<RefundEntity>>
 

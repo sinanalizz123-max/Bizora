@@ -5,8 +5,10 @@ import androidx.room.Room
 import com.bizmanager.data.repository.BusinessRepository
 import com.bizmanager.data.repository.ExpenseRepository
 import com.bizmanager.data.repository.InventoryRepository
+import com.bizmanager.data.repository.OfferRepository
 import com.bizmanager.data.repository.ProductRepository
 import com.bizmanager.data.repository.SalesRepository
+import com.bizmanager.data.repository.TaxRepository
 
 class AppContainer(private val context: Context) {
     private val database = AppDatabase.getInstance(context)
@@ -24,6 +26,8 @@ class AppContainer(private val context: Context) {
         database.customerDao()
     )
     val expenseRepository = ExpenseRepository(database.expenseDao())
+    val offerRepository = OfferRepository(database.offerDao())
+    val taxRepository = TaxRepository(database.taxDao())
     val inventoryRepository = InventoryRepository(
         database.inventoryDao(),
         database.stockMovementDao(),

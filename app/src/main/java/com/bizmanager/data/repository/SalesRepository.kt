@@ -20,6 +20,11 @@ class SalesRepository(
     fun salesBetween(start: Long, end: Long): Flow<List<SaleEntity>> =
         saleDao.observeBetween(start, end)
 
+    suspend fun nextRefundNumber(): String {
+        val max = refundDao.getMaxId() ?: 0L
+        return "RFD-%06d".format(max + 1)
+    }
+
     suspend fun recordSale(sale: SaleEntity, items: List<SaleItemEntity>): Long {
         val id = saleDao.insertSale(sale)
         saleDao.insertItems(items.map { it.copy(saleId = id) })

@@ -5,8 +5,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.bizmanager.data.repository.BusinessRepository
 import com.bizmanager.data.repository.ExpenseRepository
+import com.bizmanager.data.repository.OfferRepository
 import com.bizmanager.data.repository.ProductRepository
 import com.bizmanager.data.repository.SalesRepository
+import com.bizmanager.data.repository.TaxRepository
 import com.bizmanager.data.SettingsManager
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +23,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val productRepository: ProductRepository = container.productRepository
     val salesRepository: SalesRepository = container.salesRepository
     val expenseRepository: ExpenseRepository = container.expenseRepository
+    val offerRepository: OfferRepository = container.offerRepository
+    val taxRepository: TaxRepository = container.taxRepository
 
     val onboardingDone: StateFlow<Boolean> = settings.onboardingDone
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)

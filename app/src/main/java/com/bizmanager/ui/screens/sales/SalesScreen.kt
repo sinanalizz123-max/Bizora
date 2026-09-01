@@ -122,13 +122,18 @@ fun SalesScreen(navController: NavHostController, mainViewModel: MainViewModel) 
     if (selectedSale != null) {
         SaleDetailsDialog(
             sale = selectedSale!!,
+            salesRepository = mainViewModel.salesRepository,
             onDismiss = { selectedSale = null }
         )
     }
 }
 
 @Composable
-private fun SaleDetailsDialog(sale: SaleEntity, onDismiss: () -> Unit) {
+private fun SaleDetailsDialog(
+    sale: SaleEntity,
+    salesRepository: com.bizmanager.data.repository.SalesRepository,
+    onDismiss: () -> Unit
+) {
     val scope = rememberCoroutineScope()
     var showRefund by remember { mutableStateOf(false) }
     androidx.compose.material3.AlertDialog(
@@ -144,10 +149,20 @@ private fun SaleDetailsDialog(sale: SaleEntity, onDismiss: () -> Unit) {
                 Text("Total: $%.2f".format(sale.total), fontWeight = FontWeight.Bold)
                 if (showRefund) {
                     Spacer(Modifier.height(8.dp))
-                    Text("Refund this full sale?")
+                    Text("Refund the full amount of this sale?")
                     TextButton(onClick = {
                         scope.launch {
-                            /* refund recorded in phase 5 */
+                            salesRepository.addRefund(
+                                com.bizmanager.data.entity.RefundEntity(
+                                    saleId = sale.id,
+                                    amount = sale.total,
+                                    paymentMethod = sale.paymentMethod,
+                                    isFullRefund = true,
+                                    refundTransactionNumber = salesRepository.nextRefundNumber()
+                                )
+                            )
+                            showRefund = false
+                            onDismiss()
                         }
                     }) { Text("Confirm Refund") }
                 }

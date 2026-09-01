@@ -35,10 +35,12 @@ import com.bizmanager.ui.screens.customers.CustomersScreen
 import com.bizmanager.ui.screens.dashboard.DashboardScreen
 import com.bizmanager.ui.screens.expenses.ExpensesScreen
 import com.bizmanager.ui.screens.inventory.InventoryScreen
+import com.bizmanager.ui.screens.offers.OffersScreen
 import com.bizmanager.ui.screens.products.ProductsScreen
 import com.bizmanager.ui.screens.sales.SalesScreen
 import com.bizmanager.ui.screens.settings.SettingsScreen
 import com.bizmanager.ui.screens.selling.SellingScreen
+import com.bizmanager.ui.screens.tax.TaxScreen
 
 object Routes {
     const val DASHBOARD = "dashboard"
@@ -48,6 +50,8 @@ object Routes {
     const val INVENTORY = "inventory"
     const val CUSTOMERS = "customers"
     const val EXPENSES = "expenses"
+    const val OFFERS = "offers"
+    const val TAX = "tax"
     const val REPORTS = "reports"
     const val SETTINGS = "settings"
 }
@@ -114,6 +118,8 @@ fun MainNavHost(viewModel: MainViewModel) {
             composable(Routes.INVENTORY) { InventoryScreen(viewModel) }
             composable(Routes.CUSTOMERS) { CustomersScreen(viewModel) }
             composable(Routes.EXPENSES) { ExpensesScreen(viewModel) }
+            composable(Routes.OFFERS) { OffersScreen(viewModel) }
+            composable(Routes.TAX) { TaxScreen(viewModel) }
             composable(Routes.SETTINGS) { SettingsScreen(navController, viewModel) }
         }
     }

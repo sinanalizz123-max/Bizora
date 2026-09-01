@@ -72,6 +72,21 @@ fun SettingsScreen(navController: NavHostController, mainViewModel: MainViewMode
 
         Card {
             Column(modifier = Modifier.padding(12.dp)) {
+                Text("Data", fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(4.dp))
+                TextButton(onClick = { navController.navigate(com.bizmanager.ui.Routes.OFFERS) }) {
+                    Text("Offers & Discounts")
+                }
+                TextButton(onClick = { navController.navigate(com.bizmanager.ui.Routes.TAX) }) {
+                    Text("Tax Rates")
+                }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Card {
+            Column(modifier = Modifier.padding(12.dp)) {
                 Text("Setup", fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
                 TextButton(onClick = {
