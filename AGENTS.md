@@ -14,7 +14,7 @@ Jetpack Compose (Material 3), MVVM with Room + DataStore + StateFlow.
 - Gradle wrapper `8.10.2`, AGP `8.7.3`, Kotlin `2.0.21`, KSP `2.0.21-1.0.28`
 - `compileSdk`/`targetSdk` 35, `minSdk` 26, Java 17 target
 - Package/applicationId: `com.bizmanager`
-- Remote: `https://github.com/sinanalizz123-max/business-manager.git`
+- Remote: `https://github.com/sinanalizz123-max/Bizora.git`
 
 ## Build and verify
 
