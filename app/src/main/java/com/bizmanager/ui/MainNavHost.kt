@@ -38,6 +38,7 @@ import com.bizmanager.ui.screens.expenses.ExpensesScreen
 import com.bizmanager.ui.screens.inventory.InventoryScreen
 import com.bizmanager.ui.screens.offers.OffersScreen
 import com.bizmanager.ui.screens.products.ProductsScreen
+import com.bizmanager.ui.screens.reports.ReportsScreen
 import com.bizmanager.ui.screens.sales.SalesScreen
 import com.bizmanager.ui.screens.settings.SettingsScreen
 import com.bizmanager.ui.screens.selling.SellingScreen
@@ -123,6 +124,7 @@ fun MainNavHost(viewModel: MainViewModel) {
             composable(Routes.OFFERS) { OffersScreen(viewModel) }
             composable(Routes.TAX) { TaxScreen(viewModel) }
             composable(Routes.CASH_REGISTER) { CashRegisterScreen(viewModel) }
+            composable(Routes.REPORTS) { ReportsScreen(viewModel) }
             composable(Routes.SETTINGS) { SettingsScreen(navController, viewModel) }
         }
     }

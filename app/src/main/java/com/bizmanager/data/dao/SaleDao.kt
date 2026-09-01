@@ -27,6 +27,9 @@ interface SaleDao {
     @Query("SELECT * FROM sale_items WHERE saleId = :saleId")
     suspend fun getItems(saleId: Long): List<SaleItemEntity>
 
+    @Query("SELECT * FROM sale_items")
+    fun observeAllItems(): Flow<List<SaleItemEntity>>
+
     @Query("SELECT COUNT(*) FROM sales WHERE id = :id")
     suspend fun countById(id: Long): Int
 

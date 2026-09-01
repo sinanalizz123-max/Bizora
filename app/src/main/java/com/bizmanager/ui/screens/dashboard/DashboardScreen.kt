@@ -56,6 +56,12 @@ fun DashboardScreen(navController: NavHostController) {
         ) {
             Text("Quick Sale")
         }
+        Button(
+            onClick = { navController.navigate(Routes.REPORTS) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("View Reports")
+        }
         Card {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Today's Overview", fontWeight = FontWeight.Bold)

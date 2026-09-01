@@ -20,6 +20,8 @@ class SalesRepository(
     fun salesBetween(start: Long, end: Long): Flow<List<SaleEntity>> =
         saleDao.observeBetween(start, end)
 
+    val allSaleItems: Flow<List<SaleItemEntity>> = saleDao.observeAllItems()
+
     suspend fun nextRefundNumber(): String {
         val max = refundDao.getMaxId() ?: 0L
         return "RFD-%06d".format(max + 1)
