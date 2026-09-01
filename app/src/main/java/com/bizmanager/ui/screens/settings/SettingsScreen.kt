@@ -80,6 +80,9 @@ fun SettingsScreen(navController: NavHostController, mainViewModel: MainViewMode
                 TextButton(onClick = { navController.navigate(com.bizmanager.ui.Routes.TAX) }) {
                     Text("Tax Rates")
                 }
+                TextButton(onClick = { navController.navigate(com.bizmanager.ui.Routes.CASH_REGISTER) }) {
+                    Text("Cash Register")
+                }
             }
         }
 

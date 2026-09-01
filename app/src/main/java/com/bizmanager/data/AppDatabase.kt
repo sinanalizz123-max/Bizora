@@ -13,10 +13,12 @@ import com.bizmanager.data.dao.OfferDao
 import com.bizmanager.data.dao.ProductDao
 import com.bizmanager.data.dao.ProductVariantDao
 import com.bizmanager.data.dao.RefundDao
+import com.bizmanager.data.dao.RegisterDao
 import com.bizmanager.data.dao.SaleDao
 import com.bizmanager.data.dao.StockMovementDao
 import com.bizmanager.data.dao.TaxDao
 import com.bizmanager.data.entity.BusinessEntity
+import com.bizmanager.data.entity.CashRegisterEntity
 import com.bizmanager.data.entity.CategoryEntity
 import com.bizmanager.data.entity.CustomerEntity
 import com.bizmanager.data.entity.ExpenseEntity
@@ -44,7 +46,8 @@ import com.bizmanager.data.entity.TaxEntity
         ExpenseEntity::class,
         OfferEntity::class,
         InventoryEntity::class,
-        StockMovementEntity::class
+        StockMovementEntity::class,
+        CashRegisterEntity::class
     ],
     version = 1,
     exportSchema = false
@@ -59,6 +62,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun refundDao(): RefundDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun offerDao(): OfferDao
+    abstract fun registerDao(): RegisterDao
     abstract fun inventoryDao(): InventoryDao
     abstract fun stockMovementDao(): StockMovementDao
     abstract fun taxDao(): TaxDao

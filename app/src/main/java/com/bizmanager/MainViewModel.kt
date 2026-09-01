@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.bizmanager.data.repository.BusinessRepository
+import com.bizmanager.data.repository.CashRegisterRepository
 import com.bizmanager.data.repository.ExpenseRepository
 import com.bizmanager.data.repository.OfferRepository
 import com.bizmanager.data.repository.ProductRepository
@@ -25,6 +26,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val expenseRepository: ExpenseRepository = container.expenseRepository
     val offerRepository: OfferRepository = container.offerRepository
     val taxRepository: TaxRepository = container.taxRepository
+    val cashRegisterRepository: CashRegisterRepository = container.cashRegisterRepository
 
     val onboardingDone: StateFlow<Boolean> = settings.onboardingDone
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
