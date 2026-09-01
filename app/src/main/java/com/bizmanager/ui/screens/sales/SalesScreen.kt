@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -122,7 +121,7 @@ fun SalesScreen(navController: NavHostController, mainViewModel: MainViewModel) 
     if (selectedSale != null) {
         SaleDetailsDialog(
             sale = selectedSale!!,
-            salesRepository = mainViewModel.salesRepository,
+            mainViewModel = mainViewModel,
             onDismiss = { selectedSale = null }
         )
     }
@@ -131,11 +130,17 @@ fun SalesScreen(navController: NavHostController, mainViewModel: MainViewModel) 
 @Composable
 private fun SaleDetailsDialog(
     sale: SaleEntity,
-    salesRepository: com.bizmanager.data.repository.SalesRepository,
+    mainViewModel: MainViewModel,
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     var showRefund by remember { mutableStateOf(false) }
+    var showReceipt by remember { mutableStateOf(false) }
+    var receiptItems by remember { mutableStateOf<List<com.bizmanager.data.entity.SaleItemEntity>>(emptyList()) }
+    val business by mainViewModel.businessRepository.business.collectAsState(initial = null)
+    LaunchedEffect(showReceipt, sale.id) {
+        if (showReceipt) receiptItems = mainViewModel.salesRepository.getSaleItems(sale.id)
+    }
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(sale.transactionNumber) },
@@ -147,18 +152,32 @@ private fun SaleDetailsDialog(
                 Text("Discount: $%.2f".format(sale.discount))
                 Text("Tax: $%.2f".format(sale.taxTotal))
                 Text("Total: $%.2f".format(sale.total), fontWeight = FontWeight.Bold)
+                TextButton(onClick = { showReceipt = !showReceipt }) {
+                    Text(if (showReceipt) "Hide Receipt" else "View Receipt")
+                }
+                if (showReceipt) {
+                    Spacer(Modifier.height(8.dp))
+                    ReceiptContent(
+                        sale = sale,
+                        items = receiptItems,
+                        businessName = business?.name ?: "",
+                        businessPhone = business?.phone ?: "",
+                        businessAddress = business?.address ?: "",
+                        receiptFooter = business?.receiptFooter ?: "Thank you for your visit!"
+                    )
+                }
                 if (showRefund) {
                     Spacer(Modifier.height(8.dp))
                     Text("Refund the full amount of this sale?")
                     TextButton(onClick = {
                         scope.launch {
-                            salesRepository.addRefund(
+                            mainViewModel.salesRepository.addRefund(
                                 com.bizmanager.data.entity.RefundEntity(
                                     saleId = sale.id,
                                     amount = sale.total,
                                     paymentMethod = sale.paymentMethod,
                                     isFullRefund = true,
-                                    refundTransactionNumber = salesRepository.nextRefundNumber()
+                                    refundTransactionNumber = mainViewModel.salesRepository.nextRefundNumber()
                                 )
                             )
                             showRefund = false
@@ -181,3 +200,50 @@ private fun SaleDetailsDialog(
 
 private fun formatTime(ts: Long): String =
     SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date(ts))
+
+@Composable
+private fun ReceiptContent(
+    sale: SaleEntity,
+    items: List<com.bizmanager.data.entity.SaleItemEntity>,
+    businessName: String,
+    businessPhone: String,
+    businessAddress: String,
+    receiptFooter: String
+) {
+    Column {
+        Text(businessName.ifBlank { "Business" }, fontWeight = FontWeight.Bold)
+        if (businessPhone.isNotBlank()) Text(businessPhone, style = MaterialTheme.typography.bodySmall)
+        if (businessAddress.isNotBlank()) Text(businessAddress, style = MaterialTheme.typography.bodySmall)
+        Spacer(Modifier.height(8.dp))
+        Text("Inv: ${sale.transactionNumber}", fontWeight = FontWeight.Medium)
+        Text("Date: ${formatTime(sale.timestamp)}", style = MaterialTheme.typography.bodySmall)
+        Text("Payment: ${sale.paymentMethod}", style = MaterialTheme.typography.bodySmall)
+        Spacer(Modifier.height(8.dp))
+        items.forEach { item ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(item.productSnapshot, style = MaterialTheme.typography.bodySmall)
+                    Text("${qty(item.quantity)} x $%.2f".format(item.unitPrice), style = MaterialTheme.typography.bodySmall)
+                }
+                Text("$%.2f".format(item.lineTotal), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text("Subtotal: $%.2f".format(sale.subtotal))
+        if (sale.discount > 0) Text("Discount: -$%.2f".format(sale.discount))
+        if (sale.taxTotal > 0) Text("Tax: $%.2f".format(sale.taxTotal))
+        Text("Total: $%.2f".format(sale.total), fontWeight = FontWeight.Bold)
+        if (sale.amountReceived > 0) {
+            Text("Paid: $%.2f".format(sale.amountReceived))
+            Text("Change: $%.2f".format(sale.changeDue))
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(receiptFooter, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+private fun qty(value: Double): String =
+    if (value % 1.0 == 0.0) value.toLong().toString() else "%.2f".format(value)
