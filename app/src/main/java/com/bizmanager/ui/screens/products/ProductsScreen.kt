@@ -1,6 +1,7 @@
 package com.bizmanager.ui.screens.products
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -39,10 +41,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.bizmanager.BusinessManagerApp
@@ -50,6 +55,7 @@ import com.bizmanager.MainViewModel
 import com.bizmanager.data.entity.CategoryEntity
 import com.bizmanager.data.entity.ProductEntity
 import com.bizmanager.data.entity.ProductVariantEntity
+import com.bizmanager.util.QrGenerator
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,6 +69,7 @@ fun ProductsScreen(navController: NavHostController, mainViewModel: MainViewMode
     val products by vm.products.collectAsState()
     var selectedCategory by remember { mutableStateOf<Long?>(null) }
     var showAdd by remember { mutableStateOf(false) }
+    var qrProduct by remember { mutableStateOf<ProductEntity?>(null) }
 
     val filtered = if (selectedCategory == null) products else products.filter { it.categoryId == selectedCategory }
 
@@ -144,6 +151,7 @@ fun ProductsScreen(navController: NavHostController, mainViewModel: MainViewMode
                                     if (product.taxRate > 0) {
                                         Text("${product.taxRate}% tax", style = MaterialTheme.typography.bodySmall)
                                     }
+                                    TextButton(onClick = { qrProduct = product }) { Text("QR Code") }
                                 }
                             }
                         }
@@ -176,6 +184,10 @@ fun ProductsScreen(navController: NavHostController, mainViewModel: MainViewMode
                 }
             }
         )
+    }
+
+    qrProduct?.let { product ->
+        QrDialog(product = product, onDismiss = { qrProduct = null })
     }
 }
 
@@ -297,4 +309,41 @@ private fun AddProductDialog(
             TextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
+}
+
+@Composable
+private fun QrDialog(product: ProductEntity, onDismiss: () -> Unit) {
+    val payload = buildString {
+        append("Business Manager Product\n")
+        append("Name: ${product.name}\n")
+        append("Price: $%.2f".format(product.price))
+        product.sku?.let { append("\nSKU: $it") }
+        product.barcode?.let { append("\nBarcode: $it") }
+    }
+    val bitmap = remember(payload) { QrGenerator.generateQrBitmap(payload) }
+    Dialog(onDismissRequest = onDismiss) {
+        Card {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(product.name, fontWeight = FontWeight.Bold)
+                Text("$%.2f".format(product.price), style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(12.dp))
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "QR code for ${product.name}",
+                        modifier = Modifier.size(240.dp)
+                    )
+                } else {
+                    Text("Could not generate QR code", style = MaterialTheme.typography.bodySmall)
+                }
+                Spacer(Modifier.height(12.dp))
+                TextButton(onClick = onDismiss) { Text("Close") }
+            }
+        }
+    }
 }

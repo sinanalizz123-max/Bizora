@@ -29,11 +29,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.bizmanager.MainViewModel
 import com.bizmanager.data.entity.SaleEntity
+import com.bizmanager.util.BluetoothPrinter
+import com.bizmanager.util.ReceiptData
+import com.bizmanager.util.ReceiptFormatter
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -134,12 +138,41 @@ private fun SaleDetailsDialog(
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var showRefund by remember { mutableStateOf(false) }
     var showReceipt by remember { mutableStateOf(false) }
+    var printing by remember { mutableStateOf(false) }
+    var printError by remember { mutableStateOf<String?>(null) }
     var receiptItems by remember { mutableStateOf<List<com.bizmanager.data.entity.SaleItemEntity>>(emptyList()) }
     val business by mainViewModel.businessRepository.business.collectAsState(initial = null)
     LaunchedEffect(showReceipt, sale.id) {
         if (showReceipt) receiptItems = mainViewModel.salesRepository.getSaleItems(sale.id)
+    }
+    fun printReceipt() {
+        if (printing) return
+        printing = true
+        printError = null
+        scope.launch {
+            try {
+                val items = if (receiptItems.isEmpty()) {
+                    mainViewModel.salesRepository.getSaleItems(sale.id).also { receiptItems = it }
+                } else receiptItems
+                val data = ReceiptData(
+                    businessName = business?.name ?: "Business",
+                    businessPhone = business?.phone ?: "",
+                    businessAddress = business?.address ?: "",
+                    sale = sale,
+                    items = items,
+                    receiptFooter = business?.receiptFooter ?: "Thank you for your visit!"
+                )
+                val result = BluetoothPrinter(context).print(ReceiptFormatter.toPrinterLines(data))
+                result.exceptionOrNull()?.let { printError = it.message ?: "Print failed" }
+            } catch (e: Exception) {
+                printError = e.message ?: "Print failed"
+            } finally {
+                printing = false
+            }
+        }
     }
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
@@ -154,6 +187,12 @@ private fun SaleDetailsDialog(
                 Text("Total: $%.2f".format(sale.total), fontWeight = FontWeight.Bold)
                 TextButton(onClick = { showReceipt = !showReceipt }) {
                     Text(if (showReceipt) "Hide Receipt" else "View Receipt")
+                }
+                TextButton(onClick = ::printReceipt, enabled = !printing) {
+                    Text(if (printing) "Printing…" else "Print")
+                }
+                if (printError != null) {
+                    Text(printError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                 }
                 if (showReceipt) {
                     Spacer(Modifier.height(8.dp))

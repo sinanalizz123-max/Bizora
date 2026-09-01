@@ -80,5 +80,12 @@ abstract class AppDatabase : RoomDatabase() {
                 ).build().also { INSTANCE = it }
             }
         }
+
+        fun closeForRestore(context: Context) {
+            synchronized(this) {
+                INSTANCE?.close()
+                INSTANCE = null
+            }
+        }
     }
 }
